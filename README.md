@@ -2,9 +2,10 @@
 
 ## Description
 
-This could plugin could be useful if you are running your UI part of Matomo
+This  plugin could be useful if you are running your UI part of Matomo
 on another domain then you are tracking from.
-This plugin replaces the matomo url from your installation, to a custom domain.
+This plugin replaces the matomo url from your installation to a custom domain.
+The plugin changes both Matomo core tracking script and the TagManager script.
 
 ## Use
 
@@ -40,7 +41,3 @@ This would give you something like this:
 
 The plugin changes the variable `u`.
 
-
-## Limitations
-This plugin does not change TagManager javascript code, so if you are using
-TagManager, you need to change domain for your code yourself.

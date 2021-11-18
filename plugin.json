@@ -1,14 +1,14 @@
 {
     "name": "TrackerDomain",
     "description": "Set Domain for js trackers, useful when your UI is on another domain.",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "theme": false,
     "require": {
         "matomo": ">=4.0.0-b1,<5.0.0-b1"
     },
     "authors": [
         {
-            "name": "Matomo",
+            "name": "Mikke Schirén",
             "email": "mikke.schiren@digitalist.se",
             "homepage": "https://github.com/digitalist-se/TrackerDomain"
         }
