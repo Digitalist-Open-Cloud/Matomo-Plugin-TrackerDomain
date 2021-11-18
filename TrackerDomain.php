@@ -27,9 +27,8 @@ class TrackerDomain extends \Piwik\Plugin
 
     public function setPiwikUrl(&$codeImpl, $parameters)
     {
-
-            $config = Config::getInstance()->TrackerDomain;
-            $url = $config['url'];
+        $config = Config::getInstance()->TrackerDomain;
+        $url = $config['url'];
         if (isset($url)) {
             $codeImpl["piwikUrl"] = $url;
         }

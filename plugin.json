@@ -4,7 +4,7 @@
     "version": "0.1.0",
     "theme": false,
     "require": {
-        "matomo": ">=4.6.0-rc1,<5.0.0-b1"
+        "matomo": ">=4.0.0-b1,<5.0.0-b1"
     },
     "authors": [
         {
@@ -17,6 +17,6 @@
         "issues": "https://github.com/digitalist-se/TrackerDomain/issues"
     },
     "homepage": "https://github.com/digitalist-se/TrackerDomain",
-    "license": "Apache v2",
+    "license": "GPL v3+",
     "keywords": []
 }
