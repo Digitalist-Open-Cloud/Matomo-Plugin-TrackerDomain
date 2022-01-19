@@ -41,3 +41,6 @@ This would give you something like this:
 
 The plugin changes the variable `u`.
 
+## Credits
+This plugin is more or less a copy paste of answers from https://github.com/Findus23 (Matomo) 
+and https://github.com/tsteur (Matomo Tag Manager). Sharing is caring. ♥

@@ -58,11 +58,11 @@ class TrackerDomain extends Plugin
                 $piwikBase = rtrim(str_replace(array('http://', 'https://'), '', SettingsPiwik::getPiwikUrl()), '/');
                 $containerJs = $piwikBase . '/' . trim(StaticContainer::get('TagManagerContainerWebDir'), '/') .'/';
                 if (is_string($returnedValue)) {
-                    $returnedValue = str_replace($containerJs, $url . '/', $returnedValue);
+                    $returnedValue = str_replace($containerJs, $url . '/js/', $returnedValue);
                 } elseif (is_array($returnedValue)) {
                     foreach ($returnedValue as &$val) {
                         if (!empty($val['embedCode'])) {
-                            $val['embedCode'] = str_replace($containerJs, $url . '/', $val['embedCode']);
+                            $val['embedCode'] = str_replace($containerJs, $url . '/js/', $val['embedCode']);
                         }
                     }
                 }
