@@ -37,10 +37,11 @@ class TrackerDomain extends Plugin
     public function setPiwikUrl(&$codeImpl, $parameters)
     {
         $config = Config::getInstance()->TrackerDomain;
-        $url = $config['url'];
-        if (isset($url)) {
+        if (isset($config['url'])) {
+            $url = $config['url'];
             $codeImpl["piwikUrl"] = $url;
         }
+
     }
 
     /**
@@ -52,8 +53,9 @@ class TrackerDomain extends Plugin
         $pluginManager = Plugin\Manager::getInstance();
         if ($pluginManager->isPluginActivated('TagManager')) {
             $config = Config::getInstance()->TrackerDomain;
-            $url = $config['url'];
-
+            if (isset($config['url'])) {
+                $url = $config['url'];
+            }
             if (isset($url)) {
                 $piwikBase = rtrim(str_replace(array('http://', 'https://'), '', SettingsPiwik::getPiwikUrl()), '/');
                 $containerJs = $piwikBase . '/' . trim(StaticContainer::get('TagManagerContainerWebDir'), '/') .'/';
