@@ -66,7 +66,6 @@ class TrackerDomain extends Plugin
             $url = $config['url'];
             $codeImpl["piwikUrl"] = $url;
         }
-
     }
 
     /**
@@ -105,7 +104,9 @@ class TrackerDomain extends Plugin
     {
         $config = Config::getInstance()->TrackerDomain;
         if (isset($config)) {
-            $url = $config['url'];
+            if (isset($config['url'])) {
+                $url = $config['url'];
+            }
             if (isset($url)) {
                 $out .= '    piwik.trackerDomain = "'.($url).'"'."\n";
             }
