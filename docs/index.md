@@ -17,6 +17,8 @@ Add to config.ini.php or common.ini.php:
 url = "my.domain"
 ```
 
+Or add the domain in `General settings -> TrackerDomain`.
+
 This would give you something like this:
 
 ```html
@@ -41,7 +43,7 @@ This would give you something like this:
 
 The plugin changes the variable `u`.
 
-A global js variable is added `piwik.trackerDomain`, that could be used by other plugins.
+A global javascript variable is added `piwik.trackerDomain`, that could be used by other plugins.
 
 ## Credits
 This plugin is more or less a copy paste of answers from https://github.com/Findus23 (Matomo)
