@@ -1,22 +1,22 @@
 {
     "name": "TrackerDomain",
     "description": "Set Domain for js trackers, useful when your UI is on another domain.",
-    "version": "0.2.6",
+    "version": "0.3.0",
     "theme": false,
     "require": {
-        "matomo": ">=4.11.0-stable,<5.0.0-b1"
+        "matomo": ">=4.1.0-stable,<5.0.0-b1"
     },
     "authors": [
         {
-            "name": "Mikke Schir\u00e9n",
+            "name": "Mikke Schirén",
             "email": "mikke.schiren@digitalist.se",
-            "homepage": "https:\/\/github.com\/digitalist-se\/TrackerDomain"
+            "homepage": "https://github.com/digitalist-se/TrackerDomain"
         }
     ],
     "support": {
-        "issues": "https:\/\/github.com\/digitalist-se\/TrackerDomain\/issues"
+        "issues": "https://github.com/digitalist-se/TrackerDomain/issues"
     },
-    "homepage": "https:\/\/github.com\/digitalist-se\/TrackerDomain",
+    "homepage": "https://github.com/digitalist-se/TrackerDomain",
     "license": "GPL v3+",
     "keywords": []
 }

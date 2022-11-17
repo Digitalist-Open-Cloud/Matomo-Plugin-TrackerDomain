@@ -41,10 +41,11 @@ if (defined('ABSPATH')
 
 class TrackerDomain extends Plugin
 {
-    /**
+
+
+     /**
      * These are the events that we want to use.
      */
-
     public function registerEvents()
     {
         return [
@@ -81,8 +82,8 @@ class TrackerDomain extends Plugin
                 $url = $config['url'];
             }
             if (isset($url)) {
-                $piwikBase = rtrim(str_replace(array('http://', 'https://'), '', SettingsPiwik::getPiwikUrl()), '/');
-                $containerJs = $piwikBase . '/' . trim(StaticContainer::get('TagManagerContainerWebDir'), '/') .'/';
+                $matomoBase = rtrim(str_replace(array('http://', 'https://'), '', SettingsPiwik::getPiwikUrl()), '/');
+                $containerJs = $matomoBase . '/' . trim(StaticContainer::get('TagManagerContainerWebDir'), '/') .'/';
                 if (is_string($returnedValue)) {
                     $returnedValue = str_replace($containerJs, $url . '/js/', $returnedValue);
                 } elseif (is_array($returnedValue)) {
@@ -92,7 +93,6 @@ class TrackerDomain extends Plugin
                         }
                     }
                 }
-                $returnedValue = str_replace($containerJs, $url . '/', $returnedValue);
             }
         }
     }

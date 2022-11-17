@@ -7,6 +7,7 @@
  */
 
 namespace Piwik\Plugins\TrackerDomain;
+
 use Piwik\Piwik;
 use Piwik\Settings\Setting;
 use Piwik\Settings\FieldConfig;
@@ -38,7 +39,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
     {
         $default = "";
 
-        return $this->makeSettingManagedInConfigOnly('TrackerDomain', 'url', $default ='',FieldConfig::TYPE_STRING, function (FieldConfig $field) {
+        return $this->makeSettingManagedInConfigOnly('TrackerDomain', 'url', $default ='', FieldConfig::TYPE_STRING, function (FieldConfig $field) {
             $field->title = 'Domain';
             $field->uiControl = FieldConfig::UI_CONTROL_TEXT;
             $field->description = 'Add domain, without https:// or http://';
@@ -50,5 +51,4 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
     {
         parent::save();
     }
-
 }
