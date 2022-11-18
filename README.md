@@ -41,6 +41,10 @@ This would give you something like this:
 
 ```
 
+## Tag Manager Configuration Variable
+Important! - When you set up the TagManager you also need to adjust the **Matomo URL** in the **Matomo Configuration** Variable so that it points to the tracker domain. 
+
+
 The plugin changes the variable `u`.
 
 A global javascript variable is added `piwik.trackerDomain`, that could be used by other plugins.
