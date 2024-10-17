@@ -1,7 +1,7 @@
 {
     "name": "TrackerDomain",
     "description": "Set Domain for js trackers, useful when your UI is on another domain.",
-    "version": "5.0.4",
+    "version": "5.0.2",
     "theme": false,
     "require": {
         "matomo": ">=5.0.0-b1,<6.0.0-b1"
