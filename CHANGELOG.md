@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.0.5] - 2026-02-02
+
+### Added
+
+Also change image tracker domain.
+
 ## [5.0.2] - 2024-09-13
 
 ### Added

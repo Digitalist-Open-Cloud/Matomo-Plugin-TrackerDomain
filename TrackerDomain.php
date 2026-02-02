@@ -1,4 +1,5 @@
 <?php
+
 /**
  * The TrackerDomain plugin for Matomo.
  *
@@ -32,8 +33,10 @@ use Piwik\Plugin;
 use Piwik\SettingsPiwik;
 use Piwik\Container\StaticContainer;
 
-if (defined('ABSPATH')
-&& function_exists('add_action')) {
+if (
+    defined('ABSPATH')
+    && function_exists('add_action')
+) {
     $path = '/matomo/app/core/Plugin.php';
     if (defined('WP_PLUGIN_DIR') && WP_PLUGIN_DIR && file_exists(WP_PLUGIN_DIR . $path)) {
         require_once WP_PLUGIN_DIR . $path;
@@ -51,8 +54,6 @@ if (defined('ABSPATH')
 
 class TrackerDomain extends Plugin
 {
-
-
      /**
      * These are the events that we want to use.
      */
@@ -63,6 +64,7 @@ class TrackerDomain extends Plugin
             'API.TagManager.getContainerEmbedCode.end' => 'setTagManagerUrl',
             'API.TagManager.getContainerInstallInstructions.end' => 'setTagManagerUrl',
             'Template.jsGlobalVariables' => 'addJsGlobalVariables',
+            'API.SitesManager.getImageTrackingCode.end' => 'updateImageTrackerUrl',
         ];
     }
 
@@ -93,7 +95,7 @@ class TrackerDomain extends Plugin
             }
             if (isset($url)) {
                 $matomoBase = rtrim(str_replace(array('http://', 'https://'), '', SettingsPiwik::getPiwikUrl()), '/');
-                $containerJs = $matomoBase . '/' . trim(StaticContainer::get('TagManagerContainerWebDir'), '/') .'/';
+                $containerJs = $matomoBase . '/' . trim(StaticContainer::get('TagManagerContainerWebDir'), '/') . '/';
                 if (is_string($returnedValue)) {
                     $returnedValue = str_replace($containerJs, $url . '/js/', $returnedValue);
                 } elseif (is_array($returnedValue)) {
@@ -118,7 +120,30 @@ class TrackerDomain extends Plugin
                 $url = $config['url'];
             }
             if (isset($url)) {
-                $out .= '    piwik.trackerDomain = "'.($url).'"'."\n";
+                $out .= '    piwik.trackerDomain = "' . ($url) . '"' . "\n";
+            }
+        }
+    }
+   /**
+   * Update image tracker URL in the generated code
+   */
+    public function updateImageTrackerUrl(&$returnValue)
+    {
+        $config = Config::getInstance()->TrackerDomain;
+        if (isset($config['url']) && !empty($config['url'])) {
+            $customDomain = $config['url'];
+            $currentUrl = SettingsPiwik::getPiwikUrl();
+
+            if (is_string($returnValue)) {
+                $customDomain = preg_replace('#^https?://#', '', $customDomain);
+
+                $currentDomain = parse_url($currentUrl, PHP_URL_HOST);
+
+                if ($currentDomain) {
+                    $returnValue = str_replace($currentDomain, $customDomain, $returnValue);
+                    $returnValue = preg_replace('#https?://+#', 'https://', $returnValue);
+                    $returnValue = preg_replace('#//+#', '//', $returnValue);
+                }
             }
         }
     }
