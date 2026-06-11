@@ -1,5 +1,4 @@
 <?php
-
 /**
  * The TrackerDomain plugin for Matomo.
  *
@@ -32,11 +31,10 @@ use Piwik\Config;
 use Piwik\Plugin;
 use Piwik\SettingsPiwik;
 use Piwik\Container\StaticContainer;
+use Piwik\Plugins\TrackerDomain\Variable\MatomoConfigurationVariable;
 
-if (
-    defined('ABSPATH')
-    && function_exists('add_action')
-) {
+if (defined('ABSPATH')
+&& function_exists('add_action')) {
     $path = '/matomo/app/core/Plugin.php';
     if (defined('WP_PLUGIN_DIR') && WP_PLUGIN_DIR && file_exists(WP_PLUGIN_DIR . $path)) {
         require_once WP_PLUGIN_DIR . $path;
@@ -54,7 +52,7 @@ if (
 
 class TrackerDomain extends Plugin
 {
-     /**
+    /**
      * These are the events that we want to use.
      */
     public function registerEvents()
@@ -64,6 +62,7 @@ class TrackerDomain extends Plugin
             'API.TagManager.getContainerEmbedCode.end' => 'setTagManagerUrl',
             'API.TagManager.getContainerInstallInstructions.end' => 'setTagManagerUrl',
             'Template.jsGlobalVariables' => 'addJsGlobalVariables',
+            'TagManager.filterVariables' => 'filterVariables',
             'API.SitesManager.getImageTrackingCode.end' => 'updateImageTrackerUrl',
         ];
     }
@@ -71,7 +70,6 @@ class TrackerDomain extends Plugin
     /**
      * Set the URL to the tracking target from config,
      */
-
     public function setPiwikUrl(&$codeImpl, $parameters)
     {
         $config = Config::getInstance()->TrackerDomain;
@@ -82,9 +80,27 @@ class TrackerDomain extends Plugin
     }
 
     /**
+     * Replace Tag Manager's MatomoConfiguration variable with our own so the "Matomo URL"
+     * (matomoUrl) parameter defaults to the configured tracker domain instead of the
+     * Matomo dashboard URL. This fixes both the auto-created default variable on new sites
+     * and the value pre-filled in the Tag Manager UI, without touching the dashboard URL.
+     */
+    public function filterVariables(&$variables)
+    {
+        $config = Config::getInstance()->TrackerDomain;
+        if (empty($config['url'])) {
+            return;
+        }
+        foreach ($variables as $index => $variable) {
+            if ($variable->getId() === 'MatomoConfiguration') {
+                $variables[$index] = StaticContainer::get(MatomoConfigurationVariable::class);
+            }
+        }
+    }
+
+    /**
      * Set the URL to the tagmanager target from config,
      */
-
     public function setTagManagerUrl(&$returnedValue, $extraInfo)
     {
         $pluginManager = Plugin\Manager::getInstance();
@@ -95,7 +111,7 @@ class TrackerDomain extends Plugin
             }
             if (isset($url)) {
                 $matomoBase = rtrim(str_replace(array('http://', 'https://'), '', SettingsPiwik::getPiwikUrl()), '/');
-                $containerJs = $matomoBase . '/' . trim(StaticContainer::get('TagManagerContainerWebDir'), '/') . '/';
+                $containerJs = $matomoBase . '/' . trim(StaticContainer::get('TagManagerContainerWebDir'), '/') .'/';
                 if (is_string($returnedValue)) {
                     $returnedValue = str_replace($containerJs, $url . '/js/', $returnedValue);
                 } elseif (is_array($returnedValue)) {
@@ -110,7 +126,14 @@ class TrackerDomain extends Plugin
     }
 
     /**
-     * Add TrackerDomain as a global variable (piwik.trackerDomain)
+     * Expose JS globals consumed by other plugins:
+     *
+     *  - piwik.trackerDomain: the configured tracker domain (documented public variable).
+     *  - piwik.dashboardUrl:  the real Matomo (dashboard) URL. This is a cross-plugin
+     *    contract: because the MatomoConfiguration matomoUrl now points at the tracker
+     *    domain, plugins that need to reach the Matomo API (e.g. UserFeedback) read this
+     *    to route API requests to the dashboard instead of the tracker domain. Do not
+     *    remove without updating those consumers.
      */
     public function addJsGlobalVariables(&$out)
     {
@@ -120,13 +143,15 @@ class TrackerDomain extends Plugin
                 $url = $config['url'];
             }
             if (isset($url)) {
-                $out .= '    piwik.trackerDomain = "' . ($url) . '"' . "\n";
+                $out .= '    piwik.trackerDomain = "'.($url).'"'."\n";
+                $out .= '    piwik.dashboardUrl = "'.(SettingsPiwik::getPiwikUrl()).'"'."\n";
             }
         }
     }
-   /**
-   * Update image tracker URL in the generated code
-   */
+
+    /**
+     * Rewrite the image tracker (no-JS <img> fallback) code to use the tracker domain.
+     */
     public function updateImageTrackerUrl(&$returnValue)
     {
         $config = Config::getInstance()->TrackerDomain;
