@@ -125,7 +125,14 @@ class TrackerDomain extends Plugin
     }
 
     /**
-     * Add TrackerDomain as a global variable (piwik.trackerDomain)
+     * Expose JS globals consumed by other plugins:
+     *
+     *  - piwik.trackerDomain: the configured tracker domain (documented public variable).
+     *  - piwik.dashboardUrl:  the real Matomo (dashboard) URL. This is a cross-plugin
+     *    contract: because the MatomoConfiguration matomoUrl now points at the tracker
+     *    domain, plugins that need to reach the Matomo API (e.g. UserFeedback) read this
+     *    to route API requests to the dashboard instead of the tracker domain. Do not
+     *    remove without updating those consumers.
      */
     public function addJsGlobalVariables(&$out)
     {
@@ -136,6 +143,7 @@ class TrackerDomain extends Plugin
             }
             if (isset($url)) {
                 $out .= '    piwik.trackerDomain = "'.($url).'"'."\n";
+                $out .= '    piwik.dashboardUrl = "'.(SettingsPiwik::getPiwikUrl()).'"'."\n";
             }
         }
     }
