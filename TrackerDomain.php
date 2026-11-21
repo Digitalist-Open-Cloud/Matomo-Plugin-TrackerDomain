@@ -1,4 +1,5 @@
 <?php
+
 /**
  * The TrackerDomain plugin for Matomo.
  *
@@ -33,8 +34,10 @@ use Piwik\SettingsPiwik;
 use Piwik\Container\StaticContainer;
 use Piwik\Plugins\TrackerDomain\Variable\MatomoConfigurationVariable;
 
-if (defined('ABSPATH')
-&& function_exists('add_action')) {
+if (
+    defined('ABSPATH')
+    && function_exists('add_action')
+) {
     $path = '/matomo/app/core/Plugin.php';
     if (defined('WP_PLUGIN_DIR') && WP_PLUGIN_DIR && file_exists(WP_PLUGIN_DIR . $path)) {
         require_once WP_PLUGIN_DIR . $path;
@@ -53,6 +56,11 @@ if (defined('ABSPATH')
 class TrackerDomain extends Plugin
 {
     /**
+     * A host name, with an optional port and path.
+     */
+    private const DOMAIN_PATTERN = '~^[a-z0-9]([a-z0-9.-]*[a-z0-9])?(:[0-9]{1,5})?(/[a-z0-9._\~/-]*)?$~i';
+
+    /**
      * These are the events that we want to use.
      */
     public function registerEvents()
@@ -63,8 +71,34 @@ class TrackerDomain extends Plugin
             'API.TagManager.getContainerInstallInstructions.end' => 'setTagManagerUrl',
             'Template.jsGlobalVariables' => 'addJsGlobalVariables',
             'TagManager.filterVariables' => 'filterVariables',
+            'SitesManager.getImageTrackingCode' => 'setImageTrackerUrl',
             'API.SitesManager.getImageTrackingCode.end' => 'updateImageTrackerUrl',
         ];
+    }
+
+    /**
+     * The tracker domain as it is written: without protocol and without a slash at the end.
+     */
+    public static function normalizeDomain(string $domain): string
+    {
+        return rtrim((string) preg_replace('~^(https?:)?//~i', '', trim($domain)), '/');
+    }
+
+    public static function isValidDomain(string $domain): bool
+    {
+        return preg_match(self::DOMAIN_PATTERN, $domain) === 1;
+    }
+
+    /**
+     * The tracker domain that is set, or null when none is set. A value that is not a domain is
+     * left out, as it ends up in tracking code and in the pages of Matomo.
+     */
+    public static function getDomain(): ?string
+    {
+        $config = Config::getInstance()->TrackerDomain;
+        $domain = self::normalizeDomain((string) ($config['url'] ?? ''));
+
+        return self::isValidDomain($domain) ? $domain : null;
     }
 
     /**
@@ -72,10 +106,9 @@ class TrackerDomain extends Plugin
      */
     public function setPiwikUrl(&$codeImpl, $parameters)
     {
-        $config = Config::getInstance()->TrackerDomain;
-        if (isset($config['url'])) {
-            $url = $config['url'];
-            $codeImpl["piwikUrl"] = $url;
+        $domain = self::getDomain();
+        if ($domain !== null) {
+            $codeImpl["piwikUrl"] = $domain;
         }
     }
 
@@ -87,8 +120,7 @@ class TrackerDomain extends Plugin
      */
     public function filterVariables(&$variables)
     {
-        $config = Config::getInstance()->TrackerDomain;
-        if (empty($config['url'])) {
+        if (self::getDomain() === null) {
             return;
         }
         foreach ($variables as $index => $variable) {
@@ -103,23 +135,19 @@ class TrackerDomain extends Plugin
      */
     public function setTagManagerUrl(&$returnedValue, $extraInfo)
     {
-        $pluginManager = Plugin\Manager::getInstance();
-        if ($pluginManager->isPluginActivated('TagManager')) {
-            $config = Config::getInstance()->TrackerDomain;
-            if (isset($config['url'])) {
-                $url = $config['url'];
-            }
-            if (isset($url)) {
-                $matomoBase = rtrim(str_replace(array('http://', 'https://'), '', SettingsPiwik::getPiwikUrl()), '/');
-                $containerJs = $matomoBase . '/' . trim(StaticContainer::get('TagManagerContainerWebDir'), '/') .'/';
-                if (is_string($returnedValue)) {
-                    $returnedValue = str_replace($containerJs, $url . '/js/', $returnedValue);
-                } elseif (is_array($returnedValue)) {
-                    foreach ($returnedValue as &$val) {
-                        if (!empty($val['embedCode'])) {
-                            $val['embedCode'] = str_replace($containerJs, $url . '/js/', $val['embedCode']);
-                        }
-                    }
+        $domain = self::getDomain();
+        if ($domain === null || !Plugin\Manager::getInstance()->isPluginActivated('TagManager')) {
+            return;
+        }
+
+        $matomoBase = rtrim(str_replace(array('http://', 'https://'), '', SettingsPiwik::getPiwikUrl()), '/');
+        $containerJs = $matomoBase . '/' . trim(StaticContainer::get('TagManagerContainerWebDir'), '/') . '/';
+        if (is_string($returnedValue)) {
+            $returnedValue = str_replace($containerJs, $domain . '/js/', $returnedValue);
+        } elseif (is_array($returnedValue)) {
+            foreach ($returnedValue as &$val) {
+                if (!empty($val['embedCode'])) {
+                    $val['embedCode'] = str_replace($containerJs, $domain . '/js/', $val['embedCode']);
                 }
             }
         }
@@ -137,39 +165,41 @@ class TrackerDomain extends Plugin
      */
     public function addJsGlobalVariables(&$out)
     {
-        $config = Config::getInstance()->TrackerDomain;
-        if (isset($config)) {
-            if (isset($config['url'])) {
-                $url = $config['url'];
-            }
-            if (isset($url)) {
-                $out .= '    piwik.trackerDomain = "'.($url).'"'."\n";
-                $out .= '    piwik.dashboardUrl = "'.(SettingsPiwik::getPiwikUrl()).'"'."\n";
-            }
+        $domain = self::getDomain();
+        if ($domain === null) {
+            return;
+        }
+
+        $flags = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES;
+        $out .= '    piwik.trackerDomain = ' . json_encode($domain, $flags) . ";\n";
+        $out .= '    piwik.dashboardUrl = ' . json_encode((string) SettingsPiwik::getPiwikUrl(), $flags) . ";\n";
+    }
+
+    /**
+     * Builds the image tracker (no-JS <img> fallback) code with the tracker domain.
+     */
+    public function setImageTrackerUrl(&$piwikUrl)
+    {
+        $domain = self::getDomain();
+        if ($domain !== null) {
+            $piwikUrl = $domain;
         }
     }
 
     /**
-     * Rewrite the image tracker (no-JS <img> fallback) code to use the tracker domain.
+     * Rewrites the image tracker code for a Matomo that does not ask for the URL first, and
+     * makes it use HTTPS.
      */
     public function updateImageTrackerUrl(&$returnValue)
     {
-        $config = Config::getInstance()->TrackerDomain;
-        if (isset($config['url']) && !empty($config['url'])) {
-            $customDomain = $config['url'];
-            $currentUrl = SettingsPiwik::getPiwikUrl();
-
-            if (is_string($returnValue)) {
-                $customDomain = preg_replace('#^https?://#', '', $customDomain);
-
-                $currentDomain = parse_url($currentUrl, PHP_URL_HOST);
-
-                if ($currentDomain) {
-                    $returnValue = str_replace($currentDomain, $customDomain, $returnValue);
-                    $returnValue = preg_replace('#https?://+#', 'https://', $returnValue);
-                    $returnValue = preg_replace('#//+#', '//', $returnValue);
-                }
-            }
+        $domain = self::getDomain();
+        $currentDomain = parse_url((string) SettingsPiwik::getPiwikUrl(), PHP_URL_HOST);
+        if ($domain === null || !$currentDomain || !is_string($returnValue)) {
+            return;
         }
+
+        $returnValue = str_replace($currentDomain, $domain, $returnValue);
+        $returnValue = preg_replace('#https?://+#', 'https://', $returnValue);
+        $returnValue = preg_replace('#//+#', '//', $returnValue);
     }
 }

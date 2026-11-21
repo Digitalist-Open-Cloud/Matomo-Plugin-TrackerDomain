@@ -1,4 +1,5 @@
 <?php
+
 /**
  * The TrackerDomain plugin for Matomo.
  *
@@ -20,8 +21,8 @@
 
 namespace Piwik\Plugins\TrackerDomain\Variable;
 
-use Piwik\Config;
 use Piwik\Container\StaticContainer;
+use Piwik\Plugins\TrackerDomain\TrackerDomain;
 use Piwik\SettingsPiwik;
 use Piwik\Plugins\TagManager\Template\Variable\MatomoConfigurationVariable as TagManagerMatomoConfigurationVariable;
 
@@ -80,11 +81,10 @@ class MatomoConfigurationVariable extends TagManagerMatomoConfigurationVariable
      */
     private function buildTrackerUrl(): ?string
     {
-        $config = Config::getInstance()->TrackerDomain;
-        if (empty($config['url'])) {
+        $domain = TrackerDomain::getDomain();
+        if ($domain === null) {
             return null;
         }
-        $domain = rtrim((string) $config['url'], '/');
         if (SettingsPiwik::isHttpsForced()) {
             return 'https://' . $domain . '/';
         }

@@ -1,0 +1,7 @@
+{
+    "TrackerDomain": {
+        "SettingDomain": "Domain",
+        "SettingDomainHelp": "The domain the tracking code sends to, without https:// or http://, for example tracker.example.org. Leave empty to use the domain of Matomo.",
+        "ExceptionInvalidDomain": "The tracker domain has to be a domain name, optionally with a port and a path, for example tracker.example.org."
+    }
+}

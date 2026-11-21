@@ -1,9 +1,10 @@
 {
     "name": "TrackerDomain",
     "description": "Set Domain for js trackers, useful when your UI is on another domain.",
-    "version": "5.0.6",
+    "version": "5.1.0",
     "theme": false,
     "require": {
+        "php": ">=8.2.0",
         "matomo": ">=5.0.0-b1,<6.0.0-b1"
     },
     "authors": [

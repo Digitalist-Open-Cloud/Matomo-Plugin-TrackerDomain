@@ -1,0 +1,14 @@
+parameters:
+    level: 5
+    phpVersion: 80200
+    paths:
+        - .
+    excludePaths:
+        - tests/*
+    bootstrapFiles:
+        - ../../bootstrap-phpstan.php
+    universalObjectCratesClasses:
+        - Piwik\Config
+        - Piwik\View
+        - Piwik\ViewDataTable\Config
+        - Piwik\Session\SessionNamespace

@@ -19,6 +19,8 @@ url = "my.domain"
 
 Or add the domain in `General settings -> TrackerDomain`.
 
+Write the domain without `https://`. A port and a path are allowed, for example `my.domain:8443/analytics`. Anything else is refused in the settings and ignored in the config file. With an empty value the plugin changes nothing.
+
 This would give you something like this:
 
 ```html
@@ -43,7 +45,7 @@ This would give you something like this:
 
 The plugin changes the variable `u`.
 
-A global javascript variable is added `piwik.trackerDomain`, that could be used by other plugins.
+Two global JavaScript variables are added for other plugins: `piwik.trackerDomain`, the tracker domain, and `piwik.dashboardUrl`, the URL of Matomo itself.
 
 ## Credits
 This plugin is more or less a copy paste of answers from https://github.com/Findus23 (Matomo)
