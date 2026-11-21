@@ -1,4 +1,5 @@
 <?php
+
 /**
  * The TrackerDomain plugin for Matomo.
  *
@@ -20,12 +21,11 @@
 
 namespace Piwik\Plugins\TrackerDomain;
 
+use Exception;
 use Piwik\Piwik;
 use Piwik\Settings\Setting;
 use Piwik\Settings\FieldConfig;
-use Piwik\Validators\NotEmpty;
 use Piwik\Plugins\CoreAdminHome\Controller as CoreAdminController;
-use Piwik\Tracker\Cache;
 
 /**
  * Defines Settings for TrackerDomain.
@@ -35,7 +35,6 @@ use Piwik\Tracker\Cache;
  */
 class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
 {
-
     /** @var Setting */
     public $trackerdomain;
 
@@ -46,21 +45,21 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
         $this->trackerdomain->setIsWritableByCurrentUser($isWritable);
     }
 
-
     private function createTrackerDomainSetting()
     {
-        $default = "";
-
-        return $this->makeSettingManagedInConfigOnly('TrackerDomain', 'url', $default ='', FieldConfig::TYPE_STRING, function (FieldConfig $field) {
-            $field->title = 'Domain';
+        return $this->makeSettingManagedInConfigOnly('TrackerDomain', 'url', '', FieldConfig::TYPE_STRING, function (FieldConfig $field) {
+            $field->title = Piwik::translate('TrackerDomain_SettingDomain');
             $field->uiControl = FieldConfig::UI_CONTROL_TEXT;
-            $field->description = 'Add domain, without https:// or http://';
-            //$field->validators[] = new NotEmpty();
+            $field->description = Piwik::translate('TrackerDomain_SettingDomainHelp');
+            $field->prepare = function ($value) {
+                return TrackerDomain::normalizeDomain((string) $value);
+            };
+            // The domain ends up in tracking code and in the pages of Matomo.
+            $field->validate = function ($value) {
+                if ($value !== '' && !TrackerDomain::isValidDomain($value)) {
+                    throw new Exception(Piwik::translate('TrackerDomain_ExceptionInvalidDomain'));
+                }
+            };
         });
-    }
-
-    public function save()
-    {
-        parent::save();
     }
 }

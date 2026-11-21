@@ -19,6 +19,8 @@ url = "my.domain"
 
 Or add the domain in `General settings -> TrackerDomain`.
 
+Write the domain without `https://`. A port and a path are allowed, for example `my.domain:8443/analytics`. Anything else is refused in the settings and ignored in the config file. With an empty value the plugin changes nothing.
+
 This would give you something like this:
 
 ```html
@@ -41,13 +43,25 @@ This would give you something like this:
 
 ```
 
-## Tag Manager Configuration Variable
-Important! - When you set up the TagManager you also need to adjust the **Matomo URL** in the **Matomo Configuration** Variable so that it points to the tracker domain. 
+## Tag Manager
 
+The code to embed a container loads the container from the tracker domain, and the **Matomo URL** of a new **Matomo Configuration** variable is the tracker domain. A variable that was saved before the tracker domain was set keeps its Matomo URL: change it in Tag Manager.
+
+## Image tracking
+
+The image tracking code uses the tracker domain as well, always with `https://`.
+
+## Other plugins
 
 The plugin changes the variable `u`.
 
-A global javascript variable is added `piwik.trackerDomain`, that could be used by other plugins.
+Two global JavaScript variables are added for other plugins: `piwik.trackerDomain`, the tracker domain, and `piwik.dashboardUrl`, the URL of Matomo itself.
+
+## Tests
+
+```sh
+./console tests:run TrackerDomain
+```
 
 ## Credits
 This plugin is more or less a copy paste of answers from https://github.com/Findus23 (Matomo)

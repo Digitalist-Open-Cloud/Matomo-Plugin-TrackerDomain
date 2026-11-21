@@ -1,5 +1,24 @@
 # Changelog
 
+## [5.1.0] - 2026-11-21
+
+### Security
+
+- The tracker domain has to be a domain name, optionally with a port and a path. Other values are refused in the settings and ignored when they are in the config file. Before, the value was written unchanged into the tracking code and into the pages of Matomo.
+- The values given to JavaScript are encoded.
+
+### Fixed
+
+- An empty tracker domain changes nothing. Before, emptying the setting left the tracking code and the Tag Manager code without a domain.
+- A domain entered with `https://` or a slash at the end is used without them.
+- The image tracking code is built with the tracker domain, and no longer by replacing the host of Matomo in the finished code.
+
+### Changed
+
+- The plugin needs PHP 8.2 or newer.
+- The texts of the setting can be translated.
+- Tests, and workflows that run them, PHPCS and Semgrep.
+
 ## [5.0.6] - 2026-06-11
 
 ### Fixed
