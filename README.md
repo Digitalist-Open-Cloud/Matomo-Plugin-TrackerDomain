@@ -1,5 +1,9 @@
 # Matomo TrackerDomain Plugin
 
+[![PHPCS check](https://github.com/Digitalist-Open-Cloud/Matomo-Plugin-TrackerDomain/actions/workflows/phpcs.yaml/badge.svg)](https://github.com/Digitalist-Open-Cloud/Matomo-Plugin-TrackerDomain/actions/workflows/phpcs.yaml)
+[![Semgrep OSS scan](https://github.com/Digitalist-Open-Cloud/Matomo-Plugin-TrackerDomain/actions/workflows/semgrep.yaml/badge.svg)](https://github.com/Digitalist-Open-Cloud/Matomo-Plugin-TrackerDomain/actions/workflows/semgrep.yaml)
+[![Test plugin with Matomo](https://github.com/Digitalist-Open-Cloud/Matomo-Plugin-TrackerDomain/actions/workflows/matomo.yaml/badge.svg)](https://github.com/Digitalist-Open-Cloud/Matomo-Plugin-TrackerDomain/actions/workflows/matomo.yaml)
+
 ## Description
 
 This  plugin could be useful if you are running your UI part of Matomo
